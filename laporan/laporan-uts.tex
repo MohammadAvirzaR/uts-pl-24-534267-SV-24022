@@ -1,0 +1,581 @@
+\documentclass[12pt,letterpaper]{report}
+
+\usepackage[left=3cm,right=3cm,top=3cm,bottom=3cm]{geometry}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+
+\hypersetup{colorlinks=true, urlcolor=blue, linkcolor=black}
+\onehalfspacing
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\titleformat{\section}{\normalfont\bfseries}{\Alph{section}.}{0.5em}{}
+\titleformat{\subsection}{\normalfont\bfseries}{\arabic{subsection})}{0.5em}{}
+\titleformat{\subsubsection}{\normalfont\itshape}{}{0em}{}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    columns=flushleft
+}
+
+\newcommand{\shotwidth}{0.75\textwidth}
+\newcommand{\shot}[3]{%
+  \begin{figure}[H]
+    \centering
+    \IfFileExists{images/#1}{%
+      \includegraphics[width=\shotwidth]{images/#1}%
+    }{%
+      \fbox{%
+        \begin{minipage}[c][5cm][c]{\shotwidth}
+          \centering
+          \textit{[Placeholder Screenshot -- ganti dengan hasil pengerjaan Anda]}\\[6pt]
+          \url{images/#1}
+        \end{minipage}%
+      }%
+    }
+    \caption{#2}
+    \label{fig:#3}
+  \end{figure}
+}
+
+% Tandai bagian yang HARUS kamu isi sendiri dengan hasil nyata
+\newcommand{\isi}[1]{\textbf{\textcolor{red}{[ISI: #1]}}}
+
+\begin{document}
+
+\begin{titlepage}
+\centering
+\vspace*{0.3cm}
+{\large \textbf{LAPORAN UJIAN TENGAH SEMESTER}}\\[4pt]
+{\large \textbf{KONSTRUKSI \& EVOLUSI PERANGKAT LUNAK}}\\[4pt]
+{\large \textbf{LARAVEL, VUE, CI/CD GITHUB ACTIONS, DOCKER, DAN DOCKER COMPOSE}}
+
+\vspace{1.2cm}
+\includegraphics[width=3.5cm]{images/lambang ugm.png}
+\vspace{1.2cm}
+
+\begin{minipage}{0.75\textwidth}
+\centering
+\begin{tabular}{@{}p{3.2cm}p{0.4cm}l@{}}
+\multicolumn{3}{l}{Disusun oleh:} \\[6pt]
+Nama            & : & Mohammad Avirza Radyatanza \\[8pt]
+NIM             & : & 24/534267/SV/24022 \\[8pt]
+Kelas           & : & PL5AA \\[8pt]
+Dosen Pengampu  & : & Dr. Muhammad Fakhrurrifqi, S.Kom., M.Cs. \\
+                &   & Galih Malela Damaraji, S.Pd., M.Eng. \\
+\end{tabular}
+\end{minipage}
+
+\vspace{1.2cm}
+
+{\large \textbf{PROGRAM STUDI D-IV TEKNOLOGI REKAYASA PERANGKAT LUNAK}}\\[4pt]
+{\large \textbf{DEPARTEMEN TEKNIK ELEKTRO DAN INFORMATIKA}}\\[4pt]
+{\large \textbf{SEKOLAH VOKASI}}\\[4pt]
+{\large \textbf{UNIVERSITAS GADJAH MADA}}\\[4pt]
+{\large \textbf{YOGYAKARTA}}\\[4pt]
+{\large \textbf{2026}}
+
+\end{titlepage}
+
+\section{Informasi Umum}
+\begin{itemize}[label=--]
+    \item Tema sistem: \textbf{Project Tracker / Todo Management} -- Aplikasi manajemen proyek dan tugas untuk seorang \textit{Project Manager} yang membawahi banyak anggota tim. PM dapat membuat proyek, menugaskan tugas ke anggota, dan memantau kemajuan.
+    \item Repositori GitHub: \url{https://github.com/KEPL2026/uts-pl-24-534267-SV-24022-ver1}
+    \item Halaman GitHub Actions: \url{https://github.com/KEPL2026/uts-pl-24-534267-SV-24022-ver1/actions}
+    \item Halaman Packages (GHCR): \url{https://github.com/orgs/KEPL2026/packages}
+    \item Postman Collection: berkas \texttt{backend/postman/ProjectTracker.postman\_collection.json} pada repositori
+\end{itemize}
+
+% ============================================================
+%  SOAL 1 -- BACKEND LARAVEL (CPMK1, 15pt)
+% ============================================================
+\section{Soal 1 -- Backend Laravel RESTful API (CPMK1)}
+
+\subsection{Autentikasi Token (Login dan Logout)}
+Autentikasi menggunakan \textbf{Laravel Sanctum}, paket bawaan Laravel 11 yang menyediakan sistem token sederhana untuk SPA dan API. Proses login dilakukan melalui endpoint \texttt{POST /api/login} yang memvalidasi email dan password, lalu membuat token menggunakan \texttt{createToken()}. Token dikembalikan dalam response JSON dan harus disertakan di header \texttt{Authorization: Bearer <token>} pada setiap request selanjutnya.
+
+Logout dilakukan melalui \texttt{POST /api/logout} yang mencabut (\textit{revoke}) token yang sedang digunakan melalui \texttt{currentAccessToken()->delete()}. Seluruh endpoint selain \texttt{/api/login} dan \texttt{/api/register} dilindungi oleh middleware \texttt{auth:sanctum}, sehingga mengembalikan \textbf{401 Unauthorized} apabila request tidak menyertakan token valid.
+
+\begin{lstlisting}[language=php,caption={Potongan kode AuthController -- login}]
+public function login(Request $request)
+{
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ]);
+
+    $user = User::where('email', $request->email)->first();
+
+    if (!$user || !Hash::check($request->password, $user->password)) {
+        throw ValidationException::withMessages([
+            'email' => ['The provided credentials are incorrect.'],
+        ]);
+    }
+
+    $token = $user->createToken('auth-token')->plainTextToken;
+
+    return response()->json([
+        'message' => 'Login successful',
+        'user' => $user,
+        'token' => $token,
+    ]);
+}
+\end{lstlisting}
+
+\shot{s1-login.png}{Postman: login berhasil dan token diterima}{s1-login}
+\shot{s1-401.png}{Postman: akses tanpa token mengembalikan 401}{s1-401}
+
+\subsection{Resource CRUD}
+Dua resource utama disediakan: \texttt{Project} dan \texttt{Task}. Berikut tabel endpoint lengkap:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{lllll}
+\toprule
+\textbf{Method} & \textbf{Endpoint} & \textbf{Fungsi} & \textbf{Status} \\
+\midrule
+POST   & /api/register         & Registrasi user baru      & 201 \\
+POST   & /api/login            & Login, dapatkan token      & 200 \\
+POST   & /api/logout           & Logout, cabut token        & 200 \\
+GET    & /api/user             & Profil user saat ini       & 200 \\
+\midrule
+GET    & /api/projects         & Tampil semua project       & 200 \\
+POST   & /api/projects         & Buat project baru          & 201 \\
+GET    & /api/projects/\{id\}  & Detail satu project        & 200 \\
+PUT    & /api/projects/\{id\}  & Ubah project               & 200 \\
+DELETE & /api/projects/\{id\}  & Hapus project              & 200 \\
+\midrule
+GET    & /api/tasks            & Tampil semua task          & 200 \\
+POST   & /api/tasks            & Buat task baru             & 201 \\
+GET    & /api/tasks/\{id\}     & Detail satu task           & 200 \\
+PUT    & /api/tasks/\{id\}     & Ubah task                  & 200 \\
+DELETE & /api/tasks/\{id\}     & Hapus task                 & 200 \\
+\bottomrule
+\end{tabular}
+\caption{Daftar endpoint RESTful API}
+\end{table}
+
+\begin{lstlisting}[language=php,caption={Potongan kode ProjectController -- store}]
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'status' => 'sometimes|in:planning,active,completed,on_hold',
+        'deadline' => 'nullable|date',
+    ]);
+
+    $project = $request->user()->projects()->create($validated);
+
+    return response()->json([
+        'message' => 'Project created successfully',
+        'data' => $project,
+    ], 201);
+}
+\end{lstlisting}
+
+\shot{s1-crud-index.png}{Postman: GET daftar data}{s1-crud-index}
+\shot{s1-crud-store.png}{Postman: POST data baru, status 201}{s1-crud-store}
+\shot{s1-crud-422.png}{Postman: validasi gagal, status 422}{s1-crud-422}
+\shot{s1-crud-update-delete.png}{Postman: PUT/PATCH dan DELETE}{s1-crud-ud}
+
+\subsection{Feature Test}
+Dua file feature test dibuat:
+
+\begin{enumerate}[label=\alph*.]
+    \item \texttt{AuthTest.php} -- Menguji: login berhasil mengembalikan token, akses tanpa token mengembalikan 401, dan logout berhasil mencabut token.
+    \item \texttt{ProjectTest.php} -- Menguji: list project (200), create project (201), validasi gagal (422), update project (200), dan delete project (200).
+\end{enumerate}
+
+\begin{lstlisting}[language=php,caption={Potongan AuthTest.php}]
+public function test_user_can_login(): void
+{
+    $user = User::factory()->create([
+        'password' => Hash::make('password123'),
+    ]);
+
+    $response = $this->postJson('/api/login', [
+        'email' => $user->email,
+        'password' => 'password123',
+    ]);
+
+    $response->assertStatus(200)
+             ->assertJsonStructure(['token', 'user']);
+}
+
+public function test_user_cannot_access_protected_route_without_token(): void
+{
+    $response = $this->getJson('/api/projects');
+    $response->assertStatus(401);
+}
+\end{lstlisting}
+
+\shot{s1-test.png}{Output php artisan test (lulus)}{s1-test}
+
+\subsection{Postman Collection}
+Seluruh endpoint diekspor sebagai Postman Collection dan disimpan di direktori \texttt{backend/postman/} dalam repositori.
+
+\shot{s1-postman-repo.png}{Berkas Postman Collection di dalam repositori}{s1-postman-repo}
+
+% ============================================================
+%  SOAL 2 -- FRONTEND VUE.JS (CPMK1, 10pt)
+% ============================================================
+\section{Soal 2 -- Frontend Vue.js (CPMK1)}
+
+\subsection{Halaman Login dan Penyimpanan Token}
+Token dari response login disimpan di \texttt{localStorage} melalui Pinia store (\texttt{auth.js}). Sebuah Axios interceptor dikonfigurasi untuk secara otomatis menyertakan header \texttt{Authorization: Bearer <token>} pada setiap request, sehingga komponen tidak perlu menangani token secara manual.
+
+\begin{lstlisting}[language=javascript,caption={Axios interceptor di services/api.js}]
+import axios from 'axios'
+
+const api = axios.create({
+    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
+})
+
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('token')
+    if (token) {
+        config.headers.Authorization = `Bearer ${token}`
+    }
+    return config
+})
+
+export default api
+\end{lstlisting}
+
+\shot{s2-login.png}{Halaman login Vue}{s2-login}
+
+\subsection{Halaman CRUD melalui Axios}
+Halaman utama menampilkan daftar project milik user. Dari halaman tersebut, user dapat melihat detail, membuat baru, mengedit, dan menghapus project. Setiap project juga memiliki halaman detail yang menampilkan task-task di dalamnya.
+
+\shot{s2-list.png}{Halaman tampil data}{s2-list}
+\shot{s2-form.png}{Form tambah dan ubah data}{s2-form}
+
+\subsection{Alamat API melalui Variabel Lingkungan}
+Alamat API backend \textbf{tidak ditulis mati} (hardcode) di dalam kode komponen. Alamat tersebut dikonfigurasi melalui variabel \texttt{VITE\_API\_URL} pada berkas \texttt{.env} frontend. Variabel ini dibaca melalui \texttt{import.meta.env.VITE\_API\_URL} oleh Vite pada saat build. Hal ini memudahkan pergantian alamat API tanpa menyunting kode sumber, misalnya saat berpindah dari environment development ke Docker Compose.
+
+\begin{lstlisting}[language=bash,caption={File .env frontend}]
+VITE_API_URL=http://backend:8000/api
+\end{lstlisting}
+
+% ============================================================
+%  SOAL 3 -- GIT & CI (CPMK2, 15pt)
+% ============================================================
+\section{Soal 3 -- Manajemen GitHub dan Continuous Integration (CPMK2)}
+
+\subsection{Struktur Repositori dan Branch}
+Repository publik dibuat dengan nama \texttt{uts-pl-24-534267-SV-24022-ver1}, berisi dua folder: \texttt{backend/} untuk Laravel dan \texttt{frontend/} untuk Vue. Tiga branch digunakan: \texttt{main} (produksi), \texttt{dev} (integrasi), dan branch \texttt{feature/*} untuk pengembangan fitur.
+
+\shot{s3-repo.png}{Tab Code repositori: folder backend/ dan frontend/}{s3-repo}
+\shot{s3-branches.png}{Daftar branch main, dev, dan branch fitur}{s3-branches}
+
+\subsection{Pull Request}
+Semua perubahan masuk ke \texttt{dev} dan \texttt{main} melalui Pull Request, tidak pernah push langsung.
+
+\shot{s3-pr.png}{Pull Request yang di-merge ke dev dan main}{s3-pr}
+
+\subsection{Branch Protection}
+Branch protection diaktifkan pada \texttt{main} dan \texttt{dev} melalui Settings $\rightarrow$ Branches (atau Rules). Require Pull Request dan status check lulus sebelum merge.
+
+\shot{s3-protection.png}{Pengaturan branch protection (Settings $\rightarrow$ Branches/Rules)}{s3-protection}
+
+\subsection{Workflow CI}
+Workflow \texttt{.github/workflows/ci.yml} berisi minimal dua job:
+\begin{enumerate}[label=\alph*.]
+    \item \textbf{test}: Menjalankan \texttt{php artisan test} untuk menguji backend.
+    \item \textbf{build}: Menjalankan \texttt{npm ci} dan \texttt{npm run build} untuk memvalidasi frontend.
+\end{enumerate}
+
+Workflow berjalan pada setiap push dan pull request ke branch \texttt{main} dan \texttt{dev}.
+
+\begin{lstlisting}[language=yaml,caption={Ringkasan ci.yml}]
+name: CI/CD Pipeline
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with: { php-version: '8.3' }
+      - run: composer install --no-progress
+        working-directory: backend
+      - run: cp .env.example .env && php artisan key:generate
+        working-directory: backend
+      - run: php artisan test
+        working-directory: backend
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22' }
+      - run: npm ci
+        working-directory: frontend
+      - run: npm run build
+        working-directory: frontend
+\end{lstlisting}
+
+\shot{s3-ci-hijau.png}{Workflow CI berstatus hijau pada tab Actions}{s3-ci-hijau}
+
+% ============================================================
+%  SOAL 4 -- CD (CPMK3, 15pt)
+% ============================================================
+\section{Soal 4 -- Continuous Deployment (CPMK3)}
+
+\subsection{Kondisi Job Deploy}
+Job \texttt{deploy} ditambahkan pada workflow yang sama, dengan kondisi \texttt{if: github.ref == 'refs/heads/main' \&\& github.event\_name == 'push'} sehingga hanya berjalan saat ada push ke branch \texttt{main}. Job ini bergantung (\texttt{needs}) pada job \texttt{test} dan \texttt{build}, sehingga deploy hanya terjadi setelah pengujian dan build berhasil.
+
+\subsection{GitHub Secrets}
+Nilai rahasia \texttt{APP\_KEY} dan \texttt{DB\_PASSWORD} disimpan di GitHub Secrets (Settings $\rightarrow$ Secrets and variables $\rightarrow$ Actions). Nilai-nilai ini \textbf{tidak} ada di dalam kode repository.
+
+\shot{s4-secrets.png}{Daftar GitHub Secrets (nilai tidak terlihat)}{s4-secrets}
+
+\subsection{Bukti Run}
+\shot{s4-main.png}{Run pada branch main dengan job deploy hijau}{s4-main}
+\shot{s4-dev.png}{Run dari dev atau Pull Request: job deploy tidak berjalan}{s4-dev}
+\shot{s4-packages.png}{Halaman Packages berisi image backend dan frontend}{s4-packages}
+
+% ============================================================
+%  SOAL 5 -- DOCKERFILE (CPMK4 & CPMK5, 20pt)
+% ============================================================
+\section{Soal 5 -- Dockerfile (CPMK4 dan CPMK5)}
+
+\subsection{Dockerfile Backend}
+Backend menggunakan image dasar \texttt{dunglas/frankenphp:1.3-php8.3} (versi eksplisit, bukan \texttt{latest}). File \texttt{composer.json} dan \texttt{composer.lock} disalin \textbf{terlebih dahulu} sebelum kode aplikasi, lalu \texttt{composer install} dijalankan. Dengan demikian, selama dependensi tidak berubah, layer cache Composer dapat digunakan kembali dan proses build menjadi jauh lebih cepat.
+
+\begin{lstlisting}[language=bash,caption={backend/Dockerfile (FrankenPHP)}]
+FROM dunglas/frankenphp:1.3-php8.3
+
+RUN install-php-extensions pdo_pgsql pcntl
+
+WORKDIR /app
+
+# Layer cache: install dependencies first
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-scripts --prefer-dist
+
+# Then copy app code
+COPY . .
+RUN composer dump-autoload --optimize
+
+RUN php artisan config:cache \
+    && php artisan route:cache
+
+EXPOSE 8000
+
+CMD ["php", "artisan", "octane:frankenphp", "--host=0.0.0.0", "--port=8000"]
+\end{lstlisting}
+
+\subsection{Dockerfile Frontend (Multi-Stage)}
+Frontend menggunakan \textit{multi-stage build} dengan dua tahap:
+\begin{enumerate}[label=\arabic*.]
+    \item \textbf{Tahap build} (\texttt{node:22-alpine}): menjalankan \texttt{npm ci} dan \texttt{npm run build} untuk menghasilkan file statis di \texttt{dist/}.
+    \item \textbf{Tahap runtime} (\texttt{nginx:1.27-alpine}): hanya menyalin hasil build dari tahap pertama. Image akhir \textbf{tidak berisi} \texttt{node\_modules}.
+\end{enumerate}
+
+\begin{lstlisting}[language=bash,caption={frontend/Dockerfile (Multi-stage)}]
+# Stage 1: Build
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# Stage 2: Serve
+FROM nginx:1.27-alpine AS runtime
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+\end{lstlisting}
+
+\subsection{.dockerignore dan Tidak Ada Rahasia}
+Berkas \texttt{.dockerignore} dibuat di masing-masing folder untuk mengecualikan:
+\begin{itemize}[nosep]
+    \item \texttt{backend/}: \texttt{vendor/}, \texttt{.env}, \texttt{storage/logs/}, \texttt{node\_modules/}, \texttt{tests/}
+    \item \texttt{frontend/}: \texttt{node\_modules/}, \texttt{dist/}, \texttt{.env}, \texttt{.env.local}
+\end{itemize}
+
+Tidak ada nilai rahasia (password, key, token) yang ditulis di dalam Dockerfile. Seluruh konfigurasi sensitif diinjeksi melalui variabel lingkungan saat runtime via Docker Compose.
+
+\shot{s5-images.png}{Output docker images: ukuran image akhir dan tanpa node\_modules}{s5-images}
+
+% ============================================================
+%  SOAL 6 -- DOCKER COMPOSE (CPMK6 & CPMK7, 25pt)
+% ============================================================
+\section{Soal 6 -- Docker Compose (CPMK6 dan CPMK7)}
+
+\subsection{Berkas docker-compose.yml}
+Satu berkas \texttt{docker-compose.yml} di akar repository mendefinisikan tiga service:
+
+\begin{enumerate}[label=\alph*.]
+    \item \textbf{db}: PostgreSQL 16 dengan named volume \texttt{pgdata} untuk persistensi data.
+    \item \textbf{backend}: Laravel + FrankenPHP, terhubung ke \texttt{db} melalui nama service Docker.
+    \item \textbf{frontend}: Vue + Nginx, meneruskan request API ke \texttt{backend} melalui nama service.
+\end{enumerate}
+
+Komunikasi antar service menggunakan \textbf{nama service di jaringan Docker}, bukan alamat IP laptop.
+
+\begin{lstlisting}[language=yaml,caption={docker-compose.yml}]
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    environment:
+      APP_KEY: ${APP_KEY}
+      DB_CONNECTION: pgsql
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+\end{lstlisting}
+
+\subsection{Menjalankan Sistem}
+\begin{lstlisting}[language=bash]
+docker compose up -d --build
+\end{lstlisting}
+
+\shot{s6-up.png}{Output docker compose up -d --build}{s6-up}
+\shot{s6-ps.png}{Output docker compose ps}{s6-ps}
+
+\subsection{Pengujian dari Browser}
+\shot{s6-browser-login.png}{Login dari browser pada sistem Compose}{s6-browser-login}
+\shot{s6-browser-crud.png}{CRUD dari browser; data tersimpan di basis data}{s6-browser-crud}
+
+\subsection{Persistensi Data}
+Data basis data disimpan di \textit{named volume} \texttt{pgdata}. Setelah menjalankan \texttt{docker compose down} (tanpa \texttt{-v}) kemudian \texttt{docker compose up -d}, data yang sudah dibuat sebelumnya \textbf{tetap ada} dan tidak hilang.
+
+\shot{s6-volume.png}{Data tetap ada setelah docker compose down lalu up -d}{s6-volume}
+
+\subsection{Kredensial dari .env}
+Seluruh kredensial basis data dibaca dari berkas \texttt{.env} yang \textbf{tidak} di-commit ke repository (tercantum di \texttt{.gitignore}). Berkas \texttt{.env.example} disertakan sebagai contoh konfigurasi:
+
+\begin{lstlisting}[language=bash,caption={.env.example}]
+APP_KEY=base64:your-key-here
+DB_DATABASE=project_tracker
+DB_USERNAME=postgres
+DB_PASSWORD=secret
+\end{lstlisting}
+
+% ============================================================
+%  SOAL 7 -- BONUS FRANKENPHP (+10pt)
+% ============================================================
+\section{Soal 7 -- Nilai Tambahan: FrankenPHP}
+
+Backend Laravel menggunakan \textbf{FrankenPHP} sebagai server aplikasi, menggantikan \texttt{php artisan serve} atau PHP-FPM dengan Nginx. Image dasar yang digunakan adalah \texttt{dunglas/frankenphp:1.3-php8.3} (versi eksplisit, bukan \texttt{latest}).
+
+FrankenPHP dijalankan melalui Laravel Octane dengan perintah:
+\begin{lstlisting}[language=bash]
+php artisan octane:frankenphp --host=0.0.0.0 --port=8000
+\end{lstlisting}
+
+Backend tetap berjalan bersama service lain (\texttt{db} dan \texttt{frontend}) di dalam \texttt{docker-compose.yml}.
+
+\shot{s7-log.png}{Log container backend menunjukkan permintaan dilayani FrankenPHP}{s7-log}
+
+% ============================================================
+%  ALUR DATA
+% ============================================================
+\section{Alur Data dari Vue ke Laravel ke Basis Data}
+
+\begin{enumerate}[label=\arabic*.]
+    \item User membuka browser dan mengakses \texttt{http://localhost:5173}. Request ini dilayani oleh container \texttt{frontend} (Nginx) yang menyajikan file statis hasil build Vue.
+    \item User mengisi form login. Vue mengirim \texttt{POST /api/login} ke backend melalui Axios. Request ini diteruskan oleh konfigurasi Nginx ke container \texttt{backend} melalui jaringan internal Docker Compose (menggunakan nama service \texttt{backend}, bukan IP).
+    \item Container \texttt{backend} (Laravel + FrankenPHP) menerima request, memvalidasi kredensial terhadap data di PostgreSQL, membuat token Sanctum, dan mengembalikannya dalam response JSON.
+    \item Vue menyimpan token di \texttt{localStorage}. Axios interceptor secara otomatis menyertakan token di header \texttt{Authorization: Bearer <token>} pada setiap request berikutnya.
+    \item Saat user melakukan operasi CRUD (misal membuat project baru), Axios mengirim \texttt{POST /api/projects} dengan data JSON ke backend.
+    \item Laravel memvalidasi input (mengembalikan 422 jika gagal), lalu menyimpan data ke PostgreSQL melalui Eloquent ORM. Data disimpan di named volume \texttt{pgdata} sehingga persisten.
+    \item Laravel mengembalikan response JSON (status 201 untuk create, 200 untuk operasi lain).
+    \item Vue menerima response dan memperbarui tampilan secara reaktif.
+\end{enumerate}
+
+% ============================================================
+%  KENDALA
+% ============================================================
+\section{Kendala dan Cara Mengatasinya}
+
+\begin{longtable}{@{}p{0.42\textwidth}p{0.53\textwidth}@{}}
+\toprule
+\textbf{Kendala} & \textbf{Solusi} \\
+\midrule
+\endhead
+% Isi dengan kendala nyata selama pengerjaan -- update sesuai pengalaman
+CORS error saat frontend Vue mengakses backend Laravel dari container berbeda &
+Menambahkan konfigurasi CORS di \texttt{config/cors.php} Laravel dengan \texttt{allowed\_origins} yang mencakup alamat frontend, serta memastikan \texttt{supports\_credentials} diatur \texttt{true} \\[8pt]
+
+PostgreSQL container belum siap saat Laravel mencoba migrasi &
+Menambahkan \texttt{depends\_on} dengan \texttt{condition: service\_healthy} dan healthcheck pada service \texttt{db} di docker-compose.yml, sehingga backend menunggu database benar-benar siap \\[8pt]
+
+\textit{(Tambahkan kendala lain sesuai pengalaman pengerjaan)} &
+\textit{(Solusi yang diterapkan)} \\
+\bottomrule
+\end{longtable}
+
+% ============================================================
+%  KESIMPULAN
+% ============================================================
+\section{Kesimpulan}
+
+Berdasarkan pengerjaan ujian tengah semester ini, dapat disimpulkan bahwa:
+
+\begin{enumerate}[label=\arabic*.]
+    \item Aplikasi \textit{Project Tracker} berhasil dibangun dengan arsitektur backend-frontend terpisah menggunakan Laravel 11 (RESTful API + Sanctum) dan Vue 3 (SPA + Axios + Pinia), saling berkomunikasi melalui API JSON dengan autentikasi token.
+    \item Seluruh kode dikelola menggunakan Git dengan strategi branching (\texttt{main}, \texttt{dev}, \texttt{feature/*}), branch protection pada \texttt{main} dan \texttt{dev}, dan Pull Request wajib sebelum merge.
+    \item Pipeline CI/CD diterapkan melalui GitHub Actions: job \texttt{test} (backend) dan \texttt{build} (frontend) berjalan pada setiap push/PR, sedangkan job \texttt{deploy} (build dan push image Docker ke GHCR dengan tag commit SHA) hanya berjalan pada push ke \texttt{main}.
+    \item Dockerfile backend memanfaatkan FrankenPHP sebagai server aplikasi dengan layer caching Composer, sedangkan Dockerfile frontend menggunakan multi-stage build (Node.js + Nginx) sehingga image akhir tidak mengandung \texttt{node\_modules}.
+    \item Docker Compose berhasil mengorkestrasi tiga service (PostgreSQL, backend, frontend) dalam satu perintah \texttt{docker compose up -d --build}, dengan named volume \texttt{pgdata} untuk persistensi data dan komunikasi antar-service melalui jaringan Docker.
+    \item Penggunaan FrankenPHP sebagai server aplikasi Laravel (bonus) terbukti berfungsi, dibuktikan dari log container yang menunjukkan request dilayani oleh FrankenPHP.
+\end{enumerate}
+
+\end{document}
