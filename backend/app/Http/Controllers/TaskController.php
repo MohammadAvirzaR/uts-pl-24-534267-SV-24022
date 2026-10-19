@@ -11,7 +11,7 @@ class TaskController extends Controller
     {
         $query = Task::with(['project', 'assignee']);
 
-        if ($request->has('project_id')) {
+        if ($request->filled('project_id')) {
             $query->where('project_id', $request->project_id);
         }
 

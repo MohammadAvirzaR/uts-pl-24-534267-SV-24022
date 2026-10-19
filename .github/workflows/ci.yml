@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, dev]
+    branches: [main, dev, 'feature/**']
   pull_request:
     branches: [main, dev]
 
@@ -73,6 +73,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set lowercase repository name
+        run: echo "IMAGE_REPO=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -86,8 +89,8 @@ jobs:
           context: ./backend
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/backend:${{ github.sha }}
-            ghcr.io/${{ github.repository }}/backend:latest
+            ghcr.io/${{ env.IMAGE_REPO }}/backend:${{ github.sha }}
+            ghcr.io/${{ env.IMAGE_REPO }}/backend:latest
 
       - name: Build and push frontend image
         uses: docker/build-push-action@v6
@@ -95,5 +98,5 @@ jobs:
           context: ./frontend
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/frontend:${{ github.sha }}
-            ghcr.io/${{ github.repository }}/frontend:latest
+            ghcr.io/${{ env.IMAGE_REPO }}/frontend:${{ github.sha }}
+            ghcr.io/${{ env.IMAGE_REPO }}/frontend:latest

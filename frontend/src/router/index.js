@@ -30,6 +30,10 @@ const routes = [
     component: () => import('../views/TasksView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/projects',
+  },
 ]
 
 const router = createRouter({

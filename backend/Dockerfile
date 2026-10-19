@@ -30,15 +30,9 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
     && mkdir -p bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
-# Create entrypoint script
-RUN echo '#!/bin/sh\n\
-set -e\n\
-php artisan config:cache\n\
-php artisan route:cache\n\
-php artisan migrate --force\n\
-exec php artisan octane:frankenphp --host=0.0.0.0 --port=8000\n\
-' > /usr/local/bin/docker-entrypoint.sh \
-    && chmod +x /usr/local/bin/docker-entrypoint.sh
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE 8000
 

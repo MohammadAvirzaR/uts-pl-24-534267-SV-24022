@@ -75,8 +75,7 @@
 Nama            & : & Mohammad Avirza Radyatanza \\[8pt]
 NIM             & : & 24/534267/SV/24022 \\[8pt]
 Kelas           & : & PL5AA \\[8pt]
-Dosen Pengampu  & : & Dr. Muhammad Fakhrurrifqi, S.Kom., M.Cs. \\
-                &   & Galih Malela Damaraji, S.Pd., M.Eng. \\
+Dosen Pengampu  & : & Galih Malela Damaraji, S.Pd., M.Eng. \\
 \end{tabular}
 \end{minipage}
 
@@ -136,8 +135,8 @@ public function login(Request $request)
 }
 \end{lstlisting}
 
-\shot{s1-login.png}{Postman: login berhasil dan token diterima}{s1-login}
-\shot{s1-401.png}{Postman: akses tanpa token mengembalikan 401}{s1-401}
+\shot{1.png}{Postman: login berhasil dan token diterima}{s1-login}
+\shot{2.png}{Postman: akses tanpa token mengembalikan 401}{s1-401}
 
 \subsection{Resource CRUD}
 Dua resource utama disediakan: \texttt{Project} dan \texttt{Task}. Berikut tabel endpoint lengkap:
@@ -188,10 +187,10 @@ public function store(Request $request)
 }
 \end{lstlisting}
 
-\shot{s1-crud-index.png}{Postman: GET daftar data}{s1-crud-index}
-\shot{s1-crud-store.png}{Postman: POST data baru, status 201}{s1-crud-store}
-\shot{s1-crud-422.png}{Postman: validasi gagal, status 422}{s1-crud-422}
-\shot{s1-crud-update-delete.png}{Postman: PUT/PATCH dan DELETE}{s1-crud-ud}
+\shot{3.png}{Postman: GET daftar data}{s1-crud-index}
+\shot{4.png}{Postman: POST data baru, status 201}{s1-crud-store}
+\shot{5.png}{Postman: validasi gagal, status 422}{s1-crud-422}
+\shot{6.png}{Postman: PUT/PATCH dan DELETE}{s1-crud-ud}
 
 \subsection{Feature Test}
 Dua file feature test dibuat:
@@ -224,12 +223,12 @@ public function test_user_cannot_access_protected_route_without_token(): void
 }
 \end{lstlisting}
 
-\shot{s1-test.png}{Output php artisan test (lulus)}{s1-test}
+\shot{7.png}{Output php artisan test (lulus)}{s1-test}
 
 \subsection{Postman Collection}
 Seluruh endpoint diekspor sebagai Postman Collection dan disimpan di direktori \texttt{backend/postman/} dalam repositori.
 
-\shot{s1-postman-repo.png}{Berkas Postman Collection di dalam repositori}{s1-postman-repo}
+\shot{8.png}{Berkas Postman Collection di dalam repositori}{s1-postman-repo}
 
 % ============================================================
 %  SOAL 2 -- FRONTEND VUE.JS (CPMK1, 10pt)
@@ -239,7 +238,7 @@ Seluruh endpoint diekspor sebagai Postman Collection dan disimpan di direktori \
 \subsection{Halaman Login dan Penyimpanan Token}
 Token dari response login disimpan di \texttt{localStorage} melalui Pinia store (\texttt{auth.js}). Sebuah Axios interceptor dikonfigurasi untuk secara otomatis menyertakan header \texttt{Authorization: Bearer <token>} pada setiap request, sehingga komponen tidak perlu menangani token secara manual.
 
-\begin{lstlisting}[language=javascript,caption={Axios interceptor di services/api.js}]
+\begin{lstlisting}[language=python]
 import axios from 'axios'
 
 const api = axios.create({
@@ -257,19 +256,19 @@ api.interceptors.request.use((config) => {
 export default api
 \end{lstlisting}
 
-\shot{s2-login.png}{Halaman login Vue}{s2-login}
+\shot{9.png}{Halaman login Vue}{s2-login}
 
 \subsection{Halaman CRUD melalui Axios}
 Halaman utama menampilkan daftar project milik user. Dari halaman tersebut, user dapat melihat detail, membuat baru, mengedit, dan menghapus project. Setiap project juga memiliki halaman detail yang menampilkan task-task di dalamnya.
 
-\shot{s2-list.png}{Halaman tampil data}{s2-list}
-\shot{s2-form.png}{Form tambah dan ubah data}{s2-form}
+\shot{10.png}{Halaman tampil data}{s2-list}
+\shot{11.png}{Form tambah dan ubah data}{s2-form}
 
 \subsection{Alamat API melalui Variabel Lingkungan}
 Alamat API backend \textbf{tidak ditulis mati} (hardcode) di dalam kode komponen. Alamat tersebut dikonfigurasi melalui variabel \texttt{VITE\_API\_URL} pada berkas \texttt{.env} frontend. Variabel ini dibaca melalui \texttt{import.meta.env.VITE\_API\_URL} oleh Vite pada saat build. Hal ini memudahkan pergantian alamat API tanpa menyunting kode sumber, misalnya saat berpindah dari environment development ke Docker Compose.
 
 \begin{lstlisting}[language=bash,caption={File .env frontend}]
-VITE_API_URL=http://backend:8000/api
+VITE_API_URL=/api
 \end{lstlisting}
 
 % ============================================================
@@ -280,18 +279,18 @@ VITE_API_URL=http://backend:8000/api
 \subsection{Struktur Repositori dan Branch}
 Repository publik dibuat dengan nama \texttt{uts-pl-24-534267-SV-24022-ver1}, berisi dua folder: \texttt{backend/} untuk Laravel dan \texttt{frontend/} untuk Vue. Tiga branch digunakan: \texttt{main} (produksi), \texttt{dev} (integrasi), dan branch \texttt{feature/*} untuk pengembangan fitur.
 
-\shot{s3-repo.png}{Tab Code repositori: folder backend/ dan frontend/}{s3-repo}
-\shot{s3-branches.png}{Daftar branch main, dev, dan branch fitur}{s3-branches}
+\shot{12.png}{Tab Code repositori: folder backend/ dan frontend/}{s3-repo}
+\shot{13.png}{Daftar branch main, dev, dan branch fitur}{s3-branches}
 
 \subsection{Pull Request}
 Semua perubahan masuk ke \texttt{dev} dan \texttt{main} melalui Pull Request, tidak pernah push langsung.
 
-\shot{s3-pr.png}{Pull Request yang di-merge ke dev dan main}{s3-pr}
+\shot{14.png}{Pull Request yang di-merge ke dev dan main}{s3-pr}
 
 \subsection{Branch Protection}
 Branch protection diaktifkan pada \texttt{main} dan \texttt{dev} melalui Settings $\rightarrow$ Branches (atau Rules). Require Pull Request dan status check lulus sebelum merge.
 
-\shot{s3-protection.png}{Pengaturan branch protection (Settings $\rightarrow$ Branches/Rules)}{s3-protection}
+\shot{15.png}{Pengaturan branch protection (Settings $\rightarrow$ Branches/Rules)}{s3-protection}
 
 \subsection{Workflow CI}
 Workflow \texttt{.github/workflows/ci.yml} berisi minimal dua job:
@@ -302,7 +301,7 @@ Workflow \texttt{.github/workflows/ci.yml} berisi minimal dua job:
 
 Workflow berjalan pada setiap push dan pull request ke branch \texttt{main} dan \texttt{dev}.
 
-\begin{lstlisting}[language=yaml,caption={Ringkasan ci.yml}]
+\begin{lstlisting}[language=python]
 name: CI/CD Pipeline
 on:
   push:
@@ -337,7 +336,7 @@ jobs:
         working-directory: frontend
 \end{lstlisting}
 
-\shot{s3-ci-hijau.png}{Workflow CI berstatus hijau pada tab Actions}{s3-ci-hijau}
+\shot{16.png}{Workflow CI berstatus hijau pada tab Actions}{s3-ci-hijau}
 
 % ============================================================
 %  SOAL 4 -- CD (CPMK3, 15pt)
@@ -350,12 +349,12 @@ Job \texttt{deploy} ditambahkan pada workflow yang sama, dengan kondisi \texttt{
 \subsection{GitHub Secrets}
 Nilai rahasia \texttt{APP\_KEY} dan \texttt{DB\_PASSWORD} disimpan di GitHub Secrets (Settings $\rightarrow$ Secrets and variables $\rightarrow$ Actions). Nilai-nilai ini \textbf{tidak} ada di dalam kode repository.
 
-\shot{s4-secrets.png}{Daftar GitHub Secrets (nilai tidak terlihat)}{s4-secrets}
+\shot{17.png}{Daftar GitHub Secrets (nilai tidak terlihat)}{s4-secrets}
 
 \subsection{Bukti Run}
-\shot{s4-main.png}{Run pada branch main dengan job deploy hijau}{s4-main}
-\shot{s4-dev.png}{Run dari dev atau Pull Request: job deploy tidak berjalan}{s4-dev}
-\shot{s4-packages.png}{Halaman Packages berisi image backend dan frontend}{s4-packages}
+\shot{18.png}{Run pada branch main dengan job deploy hijau}{s4-main}
+\shot{19.png}{Run dari dev atau Pull Request: job deploy tidak berjalan}{s4-dev}
+\shot{20.png}{Halaman Packages berisi image backend dan frontend}{s4-packages}
 
 % ============================================================
 %  SOAL 5 -- DOCKERFILE (CPMK4 & CPMK5, 20pt)
@@ -420,7 +419,7 @@ Berkas \texttt{.dockerignore} dibuat di masing-masing folder untuk mengecualikan
 
 Tidak ada nilai rahasia (password, key, token) yang ditulis di dalam Dockerfile. Seluruh konfigurasi sensitif diinjeksi melalui variabel lingkungan saat runtime via Docker Compose.
 
-\shot{s5-images.png}{Output docker images: ukuran image akhir dan tanpa node\_modules}{s5-images}
+\shot{21.png}{Output docker images: ukuran image akhir dan tanpa node\_modules}{s5-images}
 
 % ============================================================
 %  SOAL 6 -- DOCKER COMPOSE (CPMK6 & CPMK7, 25pt)
@@ -438,7 +437,7 @@ Satu berkas \texttt{docker-compose.yml} di akar repository mendefinisikan tiga s
 
 Komunikasi antar service menggunakan \textbf{nama service di jaringan Docker}, bukan alamat IP laptop.
 
-\begin{lstlisting}[language=yaml,caption={docker-compose.yml}]
+\begin{lstlisting}[language=python]
 services:
   db:
     image: postgres:16-alpine
@@ -486,17 +485,17 @@ volumes:
 docker compose up -d --build
 \end{lstlisting}
 
-\shot{s6-up.png}{Output docker compose up -d --build}{s6-up}
-\shot{s6-ps.png}{Output docker compose ps}{s6-ps}
+\shot{22.png}{Output docker compose up -d --build}{s6-up}
+\shot{23.png}{Output docker compose ps}{s6-ps}
 
 \subsection{Pengujian dari Browser}
-\shot{s6-browser-login.png}{Login dari browser pada sistem Compose}{s6-browser-login}
-\shot{s6-browser-crud.png}{CRUD dari browser; data tersimpan di basis data}{s6-browser-crud}
+\shot{24.png}{Login dari browser pada sistem Compose}{s6-browser-login}
+\shot{25.png}{CRUD dari browser; data tersimpan di basis data}{s6-browser-crud}
 
 \subsection{Persistensi Data}
 Data basis data disimpan di \textit{named volume} \texttt{pgdata}. Setelah menjalankan \texttt{docker compose down} (tanpa \texttt{-v}) kemudian \texttt{docker compose up -d}, data yang sudah dibuat sebelumnya \textbf{tetap ada} dan tidak hilang.
 
-\shot{s6-volume.png}{Data tetap ada setelah docker compose down lalu up -d}{s6-volume}
+\shot{26.png}{Data tetap ada setelah docker compose down lalu up -d}{s6-volume}
 
 \subsection{Kredensial dari .env}
 Seluruh kredensial basis data dibaca dari berkas \texttt{.env} yang \textbf{tidak} di-commit ke repository (tercantum di \texttt{.gitignore}). Berkas \texttt{.env.example} disertakan sebagai contoh konfigurasi:
@@ -522,7 +521,7 @@ php artisan octane:frankenphp --host=0.0.0.0 --port=8000
 
 Backend tetap berjalan bersama service lain (\texttt{db} dan \texttt{frontend}) di dalam \texttt{docker-compose.yml}.
 
-\shot{s7-log.png}{Log container backend menunjukkan permintaan dilayani FrankenPHP}{s7-log}
+\shot{27.png}{Log container backend menunjukkan permintaan dilayani FrankenPHP}{s7-log}
 
 % ============================================================
 %  ALUR DATA
@@ -557,8 +556,8 @@ Menambahkan konfigurasi CORS di \texttt{config/cors.php} Laravel dengan \texttt{
 PostgreSQL container belum siap saat Laravel mencoba migrasi &
 Menambahkan \texttt{depends\_on} dengan \texttt{condition: service\_healthy} dan healthcheck pada service \texttt{db} di docker-compose.yml, sehingga backend menunggu database benar-benar siap \\[8pt]
 
-\textit{(Tambahkan kendala lain sesuai pengalaman pengerjaan)} &
-\textit{(Solusi yang diterapkan)} \\
+Path proyek terlalu panjang di Windows sehingga file di \texttt{vendor/} terpotong saat \texttt{composer install} (beberapa file kehilangan ekstensi \texttt{.php}) &
+Menggunakan \texttt{subst X: \textless{}path\textgreater{}} untuk memetakan path panjang ke huruf drive pendek, kemudian menjalankan ulang \texttt{composer install} dari drive \texttt{X:\textbackslash{}} \\
 \bottomrule
 \end{longtable}
 
