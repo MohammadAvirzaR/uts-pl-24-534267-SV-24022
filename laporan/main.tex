@@ -362,10 +362,10 @@ Nilai rahasia \texttt{APP\_KEY} dan \texttt{DB\_PASSWORD} disimpan di GitHub Sec
 \section{Soal 5 -- Dockerfile (CPMK4 dan CPMK5)}
 
 \subsection{Dockerfile Backend}
-Backend menggunakan image dasar \texttt{dunglas/frankenphp:1.3-php8.3} (versi eksplisit, bukan \texttt{latest}). File \texttt{composer.json} dan \texttt{composer.lock} disalin \textbf{terlebih dahulu} sebelum kode aplikasi, lalu \texttt{composer install} dijalankan. Dengan demikian, selama dependensi tidak berubah, layer cache Composer dapat digunakan kembali dan proses build menjadi jauh lebih cepat.
+Backend menggunakan image dasar \texttt{dunglas/frankenphp:1.4-php8.4} (versi eksplisit, bukan \texttt{latest}). File \texttt{composer.json} dan \texttt{composer.lock} disalin \textbf{terlebih dahulu} sebelum kode aplikasi, lalu \texttt{composer install} dijalankan. Dengan demikian, selama dependensi tidak berubah, layer cache Composer dapat digunakan kembali dan proses build menjadi jauh lebih cepat.
 
 \begin{lstlisting}[language=bash,caption={backend/Dockerfile (FrankenPHP)}]
-FROM dunglas/frankenphp:1.3-php8.3
+FROM dunglas/frankenphp:1.4-php8.4
 
 RUN install-php-extensions pdo_pgsql pcntl
 
@@ -512,7 +512,7 @@ DB_PASSWORD=secret
 % ============================================================
 \section{Soal 7 -- Nilai Tambahan: FrankenPHP}
 
-Backend Laravel menggunakan \textbf{FrankenPHP} sebagai server aplikasi, menggantikan \texttt{php artisan serve} atau PHP-FPM dengan Nginx. Image dasar yang digunakan adalah \texttt{dunglas/frankenphp:1.3-php8.3} (versi eksplisit, bukan \texttt{latest}).
+Backend Laravel menggunakan \textbf{FrankenPHP} sebagai server aplikasi, menggantikan \texttt{php artisan serve} atau PHP-FPM dengan Nginx. Image dasar yang digunakan adalah \texttt{dunglas/frankenphp:1.4-php8.4} (versi eksplisit, bukan \texttt{latest}).
 
 FrankenPHP dijalankan melalui Laravel Octane dengan perintah:
 \begin{lstlisting}[language=bash]

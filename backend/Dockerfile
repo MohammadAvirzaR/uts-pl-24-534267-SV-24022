@@ -1,4 +1,4 @@
-FROM dunglas/frankenphp:1.3-php8.3
+FROM dunglas/frankenphp:1.4-php8.4
 
 RUN install-php-extensions \
     pdo_pgsql \
@@ -22,7 +22,7 @@ RUN composer install --no-dev --no-scripts --prefer-dist --no-interaction
 # Copy application code
 COPY . .
 
-RUN composer dump-autoload --optimize
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # Create storage directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \

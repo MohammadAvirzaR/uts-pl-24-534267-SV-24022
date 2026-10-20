@@ -31,4 +31,6 @@ laporan/*.fdb_latexmk
 laporan/*.fls
 laporan/*.out
 laporan/*.synctex.gz
+laporan/*.pdf
+laporan/images/*.png
 
