@@ -1,0 +1,337 @@
+{
+	"info": {
+		"_postman_id": "uts-project-tracker",
+		"name": "Project Tracker API",
+		"description": "UTS Konstruksi & Evolusi Perangkat Lunak - Project Tracker API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api"
+		},
+		{
+			"key": "token",
+			"value": ""
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test User\",\n    \"email\": \"test@example.com\",\n    \"password\": \"password123\",\n    \"password_confirmation\": \"password123\",\n    \"role\": \"pm\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/register",
+							"host": ["{{base_url}}"],
+							"path": ["register"]
+						}
+					}
+				},
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.token) {",
+									"    pm.collectionVariables.set('token', jsonData.token);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/login",
+							"host": ["{{base_url}}"],
+							"path": ["login"]
+						}
+					}
+				},
+				{
+					"name": "Get Current User",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": ["{{base_url}}"],
+							"path": ["user"]
+						}
+					}
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/logout",
+							"host": ["{{base_url}}"],
+							"path": ["logout"]
+						}
+					}
+				},
+				{
+					"name": "Unauthorized Access (No Token)",
+					"request": {
+						"auth": { "type": "noauth" },
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/projects",
+							"host": ["{{base_url}}"],
+							"path": ["projects"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Projects",
+			"item": [
+				{
+					"name": "List All Projects",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/projects",
+							"host": ["{{base_url}}"],
+							"path": ["projects"]
+						}
+					}
+				},
+				{
+					"name": "Create Project (201)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"New Project\",\n    \"description\": \"A project created from Postman\",\n    \"status\": \"planning\",\n    \"deadline\": \"2027-06-30\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/projects",
+							"host": ["{{base_url}}"],
+							"path": ["projects"]
+						}
+					}
+				},
+				{
+					"name": "Create Project - Validation Error (422)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"invalid_status\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/projects",
+							"host": ["{{base_url}}"],
+							"path": ["projects"]
+						}
+					}
+				},
+				{
+					"name": "Show Project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/projects/1",
+							"host": ["{{base_url}}"],
+							"path": ["projects", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Project",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Updated Project Name\",\n    \"status\": \"active\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/projects/1",
+							"host": ["{{base_url}}"],
+							"path": ["projects", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Project",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/projects/1",
+							"host": ["{{base_url}}"],
+							"path": ["projects", "1"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Tasks",
+			"item": [
+				{
+					"name": "List All Tasks",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks",
+							"host": ["{{base_url}}"],
+							"path": ["tasks"]
+						}
+					}
+				},
+				{
+					"name": "List Tasks by Project",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks?project_id=1",
+							"host": ["{{base_url}}"],
+							"path": ["tasks"],
+							"query": [
+								{ "key": "project_id", "value": "1" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Create Task (201)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"New Task from Postman\",\n    \"description\": \"Task created via API\",\n    \"status\": \"todo\",\n    \"priority\": \"high\",\n    \"deadline\": \"2027-01-15\",\n    \"project_id\": 1,\n    \"assignee_id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks",
+							"host": ["{{base_url}}"],
+							"path": ["tasks"]
+						}
+					}
+				},
+				{
+					"name": "Show Task",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks/1",
+							"host": ["{{base_url}}"],
+							"path": ["tasks", "1"]
+						}
+					}
+				},
+				{
+					"name": "Update Task",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Accept", "value": "application/json" },
+							{ "key": "Content-Type", "value": "application/json" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Updated Task Title\",\n    \"status\": \"in_progress\",\n    \"priority\": \"critical\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/tasks/1",
+							"host": ["{{base_url}}"],
+							"path": ["tasks", "1"]
+						}
+					}
+				},
+				{
+					"name": "Delete Task",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Accept", "value": "application/json" }
+						],
+						"url": {
+							"raw": "{{base_url}}/tasks/1",
+							"host": ["{{base_url}}"],
+							"path": ["tasks", "1"]
+						}
+					}
+				}
+			]
+		}
+	]
+}

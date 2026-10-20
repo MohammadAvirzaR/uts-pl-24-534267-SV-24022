@@ -1,0 +1,17 @@
+.env
+vendor
+node_modules
+storage/logs
+storage/framework/sessions
+storage/framework/views
+storage/framework/cache
+bootstrap/cache
+tests
+phpunit.xml
+.git
+.gitignore
+README.md
+docker-compose.yml
+.vscode
+*.md
+postman

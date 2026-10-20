@@ -24,3 +24,13 @@ backend/bootstrap/cache/*.php
 
 # Docker
 *.log
+
+# LaTeX build files
+laporan/*.aux
+laporan/*.fdb_latexmk
+laporan/*.fls
+laporan/*.out
+laporan/*.synctex.gz
+laporan/*.pdf
+laporan/images/*.png
+
