@@ -1,33 +1,50 @@
 <template>
-  <div id="app" class="min-h-screen bg-gray-50">
-    <nav v-if="authStore.isAuthenticated" class="bg-indigo-600 text-white shadow-lg">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-6">
-          <h1 class="text-xl font-bold">📋 Project Tracker</h1>
-          <router-link to="/projects" class="hover:text-indigo-200 transition">Projects</router-link>
-          <router-link to="/tasks" class="hover:text-indigo-200 transition">Tasks</router-link>
-        </div>
-        <div class="flex items-center gap-4">
-          <span class="text-sm opacity-80">{{ authStore.user?.name }}</span>
-          <button @click="handleLogout" class="bg-indigo-500 hover:bg-indigo-400 px-3 py-1 rounded text-sm transition">
-            Logout
-          </button>
-        </div>
-      </div>
-    </nav>
+  <div v-if="authStore.isAuthenticated" class="app-wrapper">
+    <!-- Mobile Drawer Overlay -->
+    <div
+      :class="['sidebar-overlay', { 'overlay-open': isSidebarOpen }]"
+      @click="isSidebarOpen = false"
+    ></div>
+
+    <!-- Persistent Sidebar -->
+    <AppSidebar
+      :is-open="isSidebarOpen"
+      @close="isSidebarOpen = false"
+    />
+
+    <!-- Main Workspace -->
+    <div class="app-main">
+      <AppHeader @toggle-sidebar="isSidebarOpen = !isSidebarOpen" />
+      <main class="app-content">
+        <router-view />
+      </main>
+    </div>
+
+    <!-- Global Toast Notifications -->
+    <ToastContainer />
+  </div>
+
+  <!-- Guest / Auth Pages (e.g. Login) -->
+  <div v-else class="auth-wrapper">
     <router-view />
+    <ToastContainer />
   </div>
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { useAuthStore } from './stores/auth'
-import { useRouter } from 'vue-router'
+import AppSidebar from './components/AppSidebar.vue'
+import AppHeader from './components/AppHeader.vue'
+import ToastContainer from './components/ToastContainer.vue'
 
 const authStore = useAuthStore()
-const router = useRouter()
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
-}
+const isSidebarOpen = ref(false)
 </script>
+
+<style scoped>
+.auth-wrapper {
+  min-height: 100vh;
+  background-color: var(--bg-app);
+}
+</style>

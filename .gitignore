@@ -34,3 +34,7 @@ laporan/*.synctex.gz
 laporan/*.pdf
 laporan/images/*.png
 
+
+# Postman desktop local files
+.postman/
+postman/
