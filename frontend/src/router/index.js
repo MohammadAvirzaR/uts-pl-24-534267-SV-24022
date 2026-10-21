@@ -10,7 +10,13 @@ const routes = [
   },
   {
     path: '/',
-    redirect: '/projects',
+    redirect: '/dashboard',
+  },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('../views/DashboardView.vue'),
+    meta: { requiresAuth: true },
   },
   {
     path: '/projects',
@@ -32,7 +38,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    redirect: '/projects',
+    redirect: '/dashboard',
   },
 ]
 
@@ -47,7 +53,7 @@ router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next('/login')
   } else if (to.meta.guest && authStore.isAuthenticated) {
-    next('/projects')
+    next('/dashboard')
   } else {
     next()
   }
